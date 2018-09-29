@@ -14,6 +14,7 @@ rootProjectName=$(${gradlePath} projects | grep "Root project '" | awk -F "'" '{
 artifactName=${rootProjectName}
 artifactGroup=""
 artifactVersion=""
+moduleNameGradle=""
 moduleName=""
 tasks="0"
 publishType="local"
@@ -76,7 +77,8 @@ case $key in
     shift # past value
     ;;
     -p|--project)
-    moduleName=":$2"
+    moduleNameGradle=":$2"
+    moduleName="$2"
     shift # past argument
     shift # past value
     ;;
@@ -124,7 +126,12 @@ esac
 done
 
 flavorCap=$(capitalize ${flavor})
+if [ "${moduleNameGradle}" != "" ]
+then
+projectNameCap=$(capitalize ${moduleName})
+else
 projectNameCap=$(capitalize ${rootProjectName})
+fi
 
 
 if [ "${artifactSuffix}" != "" ]
@@ -138,9 +145,9 @@ then
     exit 1
 fi
 
-if [ "${moduleName}" == "${rootProjectName}" ]
+if [ "${moduleNameGradle}" == "${rootProjectName}" ]
 then
-    moduleName=""
+    moduleNameGradle=""
 fi
 
 if [ "${tasks}" == "1" ]
@@ -149,7 +156,7 @@ then
     -PbuildFlavor=${flavor} \
     -PartifactSuffix=${artifactSuffix} \
     -PbuildArtifactName=${artifactName} \
-    ${moduleName}:tasks
+    ${moduleNameGradle}:tasks
     exit 0
 fi
 
@@ -181,7 +188,7 @@ case "${publishType}" in
         ;;
 esac
 
-echo "Running commands in module: ${moduleName}"
+echo "Running commands in module: ${moduleNameGradle}"
 
 ${gradlePath} \
     -PbuildFlavor=${flavor} \
@@ -189,9 +196,9 @@ ${gradlePath} \
     -PbuildArtifactName=${artifactName} \
     -PbuildArtifactGroup="${artifactGroup}" \
     -PbuildArtifactVersion="${artifactVersion}" \
-    ${moduleName}:assemble${flavorCap} \
-    ${moduleName}:androidSources \
-    ${moduleName}:androidJavadoc \
-    ${moduleName}:androidJavadocJar \
-    ${moduleName}:generatePomFileFor${flavorCap}${projectNameCap}${artifactSuffixPom}Publication \
+    ${moduleNameGradle}:assemble${flavorCap} \
+    ${moduleNameGradle}:androidSources \
+    ${moduleNameGradle}:androidJavadoc \
+    ${moduleNameGradle}:androidJavadocJar \
+    ${moduleNameGradle}:generatePomFileFor${flavorCap}${projectNameCap}${artifactSuffixPom}Publication \
     ${publishTypeInternal} ${publishTypeAdditions} ${verbosity} ${additionalArgs}

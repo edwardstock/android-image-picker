@@ -128,8 +128,9 @@ task androidSourcesJar(type: Jar) {
 publishing {
     publications {
         android.libraryVariants.each { var ->
-            println "Build Variant: ${var.flavorName}${var.buildType.name.capitalize()}${releaseArtifactId.capitalize()}"
-            "${var.flavorName}${var.buildType.name.capitalize()}${releaseArtifactId.capitalize()}"(MavenPublication) {
+            println "Build Variant: ${var.flavorName}${var.flavorName != "" ? var.buildType.name.capitalize() : var.buildType.name}${releaseArtifactId.capitalize()}"
+
+            "${var.flavorName}${var.flavorName != "" ? var.buildType.name.capitalize() : var.buildType.name}${releaseArtifactId.capitalize()}"(MavenPublication) {
                 groupId releaseGroup
                 artifactId releaseArtifactId
                 version releaseVersion
@@ -141,27 +142,22 @@ publishing {
 
                 pom.withXml {
                     asNode().appendNode("description", pomDescription)
-                    def licenses = asNode().appendNode("licenses")
-                    def mitLicense = licenses.appendNode("license")
-                    mitLicense.appendNode("name", "MIT License")
-                    mitLicense.appendNode("url", "https://opensource.org/licenses/MIT")
-                    mitLicense.appendNode("distribution", "repo")
 
                     def developers = asNode().appendNode("developers")
 
-                    def dev0 = developers.asNode().appendNode("developer")
-                    dev1.appendNode("id", "esafirm")
-                    dev1.appendNode("name", "esafirm")
-                    dev1.appendNode("url", "https://github.com/esafirm")
-                    dev1.appendNode("roles").appendNode("role", "maintainer")
+                    def maintainer = developers.appendNode("developer")
+                    maintainer.appendNode("id", "esafirm")
+                    maintainer.appendNode("name", "esafirm")
+                    maintainer.appendNode("url", "https://github.com/esafirm")
+                    maintainer.appendNode("roles").appendNode("role", "maintainer")
 
-                    def dev1 = developers.asNode().appendNode("developer")
-                    dev1.appendNode("id", "edwardstock")
-                    dev1.appendNode("name", "Eduard Maximovich")
-                    dev1.appendNode("email", "edward.vstock@gmail.com")
-                    dev1.appendNode("url", "https://github.com/edwardstock")
-                    dev1.appendNode("roles").appendNode("role", "contributor")
-                    dev1.appendNode("timezone", "Europe/Moscow")
+                    def contributor = developers.appendNode("developer")
+                    contributor.appendNode("id", "edwardstock")
+                    contributor.appendNode("name", "Eduard Maximovich")
+                    contributor.appendNode("email", "edward.vstock@gmail.com")
+                    contributor.appendNode("url", "https://github.com/edwardstock")
+                    contributor.appendNode("roles").appendNode("role", "contributor")
+                    contributor.appendNode("timezone", "Europe/Moscow")
 
                     def dependenciesNode = asNode().appendNode('dependencies')
 
@@ -175,12 +171,15 @@ publishing {
                     List<String> depsVariantsTarget = new ArrayList<>()
                     for (String depVar : depsVariantsSrc) {
                         depsVariantsTarget.add(depVar)
-                        depsVariantsTarget.add(var.flavorName + depVar.capitalize())
+                        if(var.flavorName != "") {
+                            depsVariantsTarget.add(var.flavorName + depVar.capitalize())
+                        }
+
                     }
 
                     depsVariantsTarget.each {
                         it
-                        // Iterate over the implementation dependencies (we don't want the test ones), adding a <dependency> node for each
+                        // Iterate over the implementation dependencies (we don't want the test ones), adding a <dependency> node for each flavor
                         configurations."${it}".allDependencies.each {
                             // Ensure dependencies such as fileTree are not included in the pom.
                             if (it.name != 'unspecified') {
