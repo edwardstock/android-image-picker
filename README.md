@@ -1,10 +1,14 @@
 # ImagePicker 
 
-[![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-ImagePicker-brightgreen.svg?style=flat)](https://android-arsenal.com/details/1/4618)
-
 <img  src="https://github.com/esafirm/android-image-picker/blob/master/art/logo.png?raw=true" width="180" height="180"/> 
 
 A simple library to select images from the gallery and camera.
+
+# Fork notes:
+ - added ability to select only photos or only videos
+ - updated support libraries
+ - updated dependencies
+ - removed rxjava 1 module
 
 # Screenshot
 
@@ -14,14 +18,14 @@ A simple library to select images from the gallery and camera.
 src="https://raw.githubusercontent.com/esafirm/android-image-picker/master/art/ss.gif" height="460" width="284"/>
 </details>
 
-## Download [![](https://jitpack.io/v/esafirm/android-image-picker.svg)](https://jitpack.io/#esafirm/android-image-picker)
+## Download [ ![Download](https://api.bintray.com/packages/edwardstock/android/imagepicker/images/download.svg) ](https://bintray.com/edwardstock/android/imagepicker/_latestVersion)
 
 Add this to your project's `build.gradle`
 
 ```groovy
 allprojects {
     repositories {
-        maven { url "https://jitpack.io" }
+        maven { url  "https://dl.bintray.com/edwardstock/android" }
     }
 }
 ```
@@ -30,15 +34,11 @@ And add this to your module's `build.gradle`
 
 ```groovy
 dependencies {
-	implementation 'com.github.esafirm.android-image-picker:imagepicker:x.y.z'
-	// for experimental rx picker
-	implementation 'com.github.esafirm.android-image-picker:rximagepicker:x.y.z'
-	// If you have a problem with Glide, please use the same Glide version or simply open an issue
-	implementation 'com.github.bumptech.glide:glide:4.5.0'
+	implementation 'com.edwardstock.android:imagepicker:1.14.0'
 }
 ```
 
-change `x.y.z` to version in the [release page](https://github.com/esafirm/android-image-picker/releases)
+change `x.y.z` to version in the [release page](https://github.com/edwardstock/android-image-picker/releases)
 
 **Breaking changes**
 
@@ -70,6 +70,7 @@ ImagePicker.create(this)
 	.toolbarImageTitle("Tap to select") // image selection title
 	.toolbarArrowColor(Color.BLACK) // Toolbar 'up' arrow color
 	.includeVideo(true) // Show video on image picker 
+	.includePhotos(true) // Show photos on image picker (default true)
 	.single() // single mode
 	.multi() // multi mode (default mode)
 	.limit(10) // max images can be selected (99 by default)
