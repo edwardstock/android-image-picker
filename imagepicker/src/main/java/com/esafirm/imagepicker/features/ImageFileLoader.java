@@ -33,8 +33,8 @@ public class ImageFileLoader {
             MediaStore.Images.Media.BUCKET_DISPLAY_NAME
     };
 
-    public void loadDeviceImages(final boolean isFolderMode, final boolean includeVideo, final ArrayList<File> excludedImages, final ImageLoaderListener listener) {
-        getExecutorService().execute(new ImageLoadRunnable(isFolderMode, includeVideo, excludedImages, listener));
+    public void loadDeviceImages(final boolean isFolderMode, final boolean includeVideo, final boolean includePhotos, final ArrayList<File> excludedImages, final ImageLoaderListener listener) {
+        getExecutorService().execute(new ImageLoadRunnable(isFolderMode, includeVideo, includePhotos, excludedImages, listener));
     }
 
     public void abortLoadImages() {
@@ -53,22 +53,24 @@ public class ImageFileLoader {
 
     private class ImageLoadRunnable implements Runnable {
 
+        private boolean includePhotos;
         private boolean isFolderMode;
         private boolean includeVideo;
-        private ArrayList<File> exlucedImages;
+        private ArrayList<File> excludedImages;
         private ImageLoaderListener listener;
 
-        public ImageLoadRunnable(boolean isFolderMode, boolean includeVideo, ArrayList<File> excludedImages, ImageLoaderListener listener) {
+        public ImageLoadRunnable(boolean isFolderMode, boolean includeVideo, boolean includePhotos, ArrayList<File> excludedImages, ImageLoaderListener listener) {
             this.isFolderMode = isFolderMode;
             this.includeVideo = includeVideo;
-            this.exlucedImages = excludedImages;
+            this.includePhotos = includePhotos;
+            this.excludedImages = excludedImages;
             this.listener = listener;
         }
 
         @Override
         public void run() {
             Cursor cursor;
-            if (includeVideo) {
+            if (includeVideo && includePhotos) {
                 String selection = MediaStore.Files.FileColumns.MEDIA_TYPE + "="
                         + MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE + " OR "
                         + MediaStore.Files.FileColumns.MEDIA_TYPE + "="
@@ -76,6 +78,9 @@ public class ImageFileLoader {
 
                 cursor = context.getContentResolver().query(MediaStore.Files.getContentUri("external"), projection,
                         selection, null, MediaStore.Images.Media.DATE_ADDED);
+            } else if(!includePhotos && includeVideo) {
+                cursor = context.getContentResolver().query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, projection,
+                        null, null, MediaStore.Video.Media.DATE_ADDED);
             } else {
                 cursor = context.getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection,
                         null, null, MediaStore.Images.Media.DATE_ADDED);
@@ -101,7 +106,7 @@ public class ImageFileLoader {
 
                     File file = makeSafeFile(path);
                     if (file != null) {
-                        if (exlucedImages != null && exlucedImages.contains(file))
+                        if (excludedImages != null && excludedImages.contains(file))
                             continue;
 
                         Image image = new Image(id, name, path);

@@ -156,6 +156,10 @@ public abstract class ImagePicker {
         return this;
     }
 
+    public ImagePicker includePhotos(boolean includePhotos) {
+        config.setIncludePhotos(includePhotos);
+        return this;
+    }
 
     public ImagePicker includeVideo(boolean includeVideo) {
         config.setIncludeVideo(includeVideo);

@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="@dimen/ef_height_snackbar"
-    tools:parentTag="RelativeLayout">
+    tools:parentTag="android.support.constraint.ConstraintLayout">
 
     <TextView
         android:id="@+id/ef_snackbar_txt_bottom_caption"

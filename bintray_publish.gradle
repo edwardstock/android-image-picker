@@ -1,0 +1,230 @@
+/*
+ * Copyright (C) by MinterTeam. 2018
+ * @link <a href="https://github.com/MinterTeam">Org Github</a>
+ * @link <a href="https://github.com/edwardstock">Maintainer Github</a>
+ *
+ * The MIT License
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
+// DEFS
+
+task printFlavors {
+    String[] flavors = new String[android.productFlavors.size() * 2]
+
+    int s = 0
+    for (flavor in android.productFlavors) {
+        flavors[s++] = flavor.name + "Debug"
+        flavors[s++] = flavor.name + "Release"
+    }
+
+    for (fname in flavors) {
+        println fname
+    }
+}
+
+def pomDescription = (hasProperty("pomDescription") ? getProperty("pomDescription") : "Minter Blockchain Android SDK")
+
+def hasArgument(String arg) {
+    return hasProperty(arg) && !getProperty(arg).isEmpty()
+}
+
+group = getProperty("group")
+version = android.defaultConfig.versionName
+def releaseGroup = this.group
+def releaseVersion = this.version
+def releaseArtifactId = project.name
+def artifactName = ""
+def artifactNameNoExtension = ""
+def flavorName = ""
+
+if (hasArgument("buildArtifactName")) {
+    releaseArtifactId = getProperty("buildArtifactName")
+}
+
+if (hasArgument("buildArtifactGroup")) {
+    releaseGroup = getProperty("buildArtifactGroup")
+}
+
+if (hasArgument("buildArtifactVersion")) {
+    releaseVersion = getProperty("buildArtifactVersion")
+}
+
+if (hasProperty("buildFlavor") && !getProperty("buildFlavor").isEmpty()) {
+    flavorName = getProperty("buildFlavor")
+    def artifactFlavorName = flavorName.substring(0, 1).toLowerCase() + flavorName.substring(1)
+    artifactFlavorName = artifactFlavorName.replace("Debug", "-debug").replace("Release", "-release")
+    artifactName = releaseArtifactId + "-" + artifactFlavorName + ".aar"
+} else {
+    artifactName = releaseArtifactId + ".aar"
+}
+
+if (hasProperty("artifactSuffix") && !getProperty("artifactSuffix").isEmpty()) {
+    releaseArtifactId += "-" + getProperty("artifactSuffix")
+}
+
+println "Artifact {" +
+        "\n\tid: ${releaseArtifactId}," +
+        "\n\tgroup: ${releaseGroup}," +
+        "\n\tversion: ${releaseVersion}" +
+        "\n\tname (file): $buildDir/outputs/aar/${artifactName}" +
+        "\n\troot project name: ${rootProject.name}" +
+        "\n\tproject name: ${project.name}" +
+        "\n\timplementation example: implementation '${releaseGroup}:${releaseArtifactId}:${releaseVersion}'" +
+        "\n}"
+
+// rename output lib file to artifactName with aar extension
+android.libraryVariants.all { variant ->
+    variant.outputs.all { output ->
+        if (outputFile != null && outputFileName.endsWith('.aar')) {
+            outputFileName = "${artifactName}"
+        }
+    }
+}
+
+// TASKS
+tasks.withType(Jar) {
+    from(project.projectDir) {
+        include 'LICENSE'
+        into 'META-INF'
+    }
+}
+
+task androidJavadoc(type: Javadoc) {
+    failOnError false
+    source = android.sourceSets.main.java.sourceFiles
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    classpath += configurations.compile
+}
+
+// build a jar with javadoc
+task androidJavadocJar(type: Jar, dependsOn: androidJavadoc) {
+    classifier = 'javadoc'
+    from androidJavadoc.destinationDir
+}
+
+task androidSourcesJar(type: Jar) {
+    classifier = 'sources'
+    from android.sourceSets.main.java.source
+}
+
+publishing {
+    publications {
+        android.libraryVariants.each { var ->
+            println "Build Variant: ${var.flavorName}${var.buildType.name.capitalize()}${releaseArtifactId.capitalize()}"
+            "${var.flavorName}${var.buildType.name.capitalize()}${releaseArtifactId.capitalize()}"(MavenPublication) {
+                groupId releaseGroup
+                artifactId releaseArtifactId
+                version releaseVersion
+
+                // Tell maven to prepare the generated "*.aar" file for publishing
+                artifact("$buildDir/outputs/aar/${artifactName}")
+                artifact androidSourcesJar
+                artifact androidJavadocJar
+
+                pom.withXml {
+                    asNode().appendNode("description", pomDescription)
+                    def licenses = asNode().appendNode("licenses")
+                    def mitLicense = licenses.appendNode("license")
+                    mitLicense.appendNode("name", "MIT License")
+                    mitLicense.appendNode("url", "https://opensource.org/licenses/MIT")
+                    mitLicense.appendNode("distribution", "repo")
+
+                    def developers = asNode().appendNode("developers")
+
+                    def dev0 = developers.asNode().appendNode("developer")
+                    dev1.appendNode("id", "esafirm")
+                    dev1.appendNode("name", "esafirm")
+                    dev1.appendNode("url", "https://github.com/esafirm")
+                    dev1.appendNode("roles").appendNode("role", "maintainer")
+
+                    def dev1 = developers.asNode().appendNode("developer")
+                    dev1.appendNode("id", "edwardstock")
+                    dev1.appendNode("name", "Eduard Maximovich")
+                    dev1.appendNode("email", "edward.vstock@gmail.com")
+                    dev1.appendNode("url", "https://github.com/edwardstock")
+                    dev1.appendNode("roles").appendNode("role", "contributor")
+                    dev1.appendNode("timezone", "Europe/Moscow")
+
+                    def dependenciesNode = asNode().appendNode('dependencies')
+
+
+                    def depsVariantsSrc = [
+                            "implementation",
+                            "api",
+                            "compile"
+                    ]
+
+                    List<String> depsVariantsTarget = new ArrayList<>()
+                    for (String depVar : depsVariantsSrc) {
+                        depsVariantsTarget.add(depVar)
+                        depsVariantsTarget.add(var.flavorName + depVar.capitalize())
+                    }
+
+                    depsVariantsTarget.each {
+                        it
+                        // Iterate over the implementation dependencies (we don't want the test ones), adding a <dependency> node for each
+                        configurations."${it}".allDependencies.each {
+                            // Ensure dependencies such as fileTree are not included in the pom.
+                            if (it.name != 'unspecified') {
+                                def dependencyNode = dependenciesNode.appendNode('dependency')
+                                dependencyNode.appendNode('groupId', it.group)
+                                dependencyNode.appendNode('artifactId', it.name)
+                                dependencyNode.appendNode('version', it.version)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+if (hasProperty("bintray_user") && hasProperty("bintray_key") && flavorName != "") {
+
+    println "Bintray upload: available"
+    println "Publication:   ${flavorName}${releaseArtifactId.capitalize()}"
+    bintray {
+        user = getProperty("bintray_user")
+        key = getProperty("bintray_key")
+        publications = ["${flavorName}${releaseArtifactId.capitalize()}"]
+        pkg {
+            repo = "android"
+            name = releaseArtifactId
+            licenses = ['Apache-2.0']
+            githubRepo = "edwardstock/${rootProject.name}"
+            vcsUrl = "https://github.com/edwardstock/${rootProject.name}.git"
+            issueTrackerUrl = "https://github.com/edwardstock/${rootProject.name}/issues"
+            websiteUrl = "https://github.com/edwardstock"
+
+            version {
+                name = releaseVersion
+                desc = pomDescription
+                released = new Date()
+                vcsTag = releaseVersion
+
+            }
+        }
+    }
+
+
+} else {
+    println "Bintray upload: unavailable"
+}

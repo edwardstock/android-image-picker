@@ -13,9 +13,6 @@ import com.esafirm.imagepicker.features.ImagePicker;
 import com.esafirm.imagepicker.features.IpCons;
 import com.esafirm.imagepicker.features.ReturnMode;
 import com.esafirm.imagepicker.model.Image;
-import com.esafirm.rximagepicker.RxImagePicker;
-import rx.Observable;
-import rx.functions.Action1;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
         textView = findViewById(R.id.text_view);
 
         findViewById(R.id.button_pick_image).setOnClickListener(view -> start());
-        findViewById(R.id.button_pick_image_rx).setOnClickListener(view -> getImagePickerObservable().forEach(action));
+//        findViewById(R.id.button_pick_image_rx).setOnClickListener(view -> getImagePickerObservable().forEach(action));
         findViewById(R.id.button_intent).setOnClickListener(v -> startWithIntent());
         findViewById(R.id.button_camera).setOnClickListener(v -> {
             captureImage();
@@ -61,12 +58,12 @@ public class MainActivity extends AppCompatActivity {
         ImagePicker.cameraOnly().start(this);
     }
 
-    Action1<List<Image>> action = this::printImages;
-
-    private Observable<List<Image>> getImagePickerObservable() {
-        return RxImagePicker.getInstance()
-                .start(this, ImagePicker.create(this));
-    }
+//    Action1<List<Image>> action = this::printImages;
+//
+//    private Observable<List<Image>> getImagePickerObservable() {
+//        return RxImagePicker.getInstance()
+//                .start(this, ImagePicker.create(this));
+//    }
 
     private void startWithIntent() {
         startActivityForResult(ImagePicker.create(this)
@@ -80,6 +77,7 @@ public class MainActivity extends AppCompatActivity {
         final boolean isSingleMode = ((Switch) findViewById(R.id.ef_switch_single)).isChecked();
         final boolean useCustomImageLoader = ((Switch) findViewById(R.id.ef_switch_imageloader)).isChecked();
         final boolean folderMode = ((Switch) findViewById(R.id.ef_switch_folder_mode)).isChecked();
+        final boolean includePhotos = ((Switch) findViewById(R.id.ef_switch_include_photos)).isChecked();
         final boolean includeVideo = ((Switch) findViewById(R.id.ef_switch_include_video)).isChecked();
         final boolean isExclude = ((Switch) findViewById(R.id.ef_switch_include_exclude)).isChecked();
 
@@ -91,6 +89,7 @@ public class MainActivity extends AppCompatActivity {
                         : ReturnMode.NONE) // set whether pick action or camera action should return immediate result or not. Only works in single mode for image picker
                 .folderMode(folderMode) // set folder mode (false by default)
                 .includeVideo(includeVideo) // include video (false by default)
+                .includePhotos(includePhotos) // include photos (true by default)
                 .toolbarArrowColor(Color.RED) // set toolbar arrow up color
                 .toolbarFolderTitle("Folder") // folder selection title
                 .toolbarImageTitle("Tap to select") // image selection title
