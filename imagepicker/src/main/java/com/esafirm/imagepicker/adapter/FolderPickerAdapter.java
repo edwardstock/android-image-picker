@@ -1,6 +1,7 @@
 package com.esafirm.imagepicker.adapter;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,14 +28,15 @@ public class FolderPickerAdapter extends BaseListAdapter<FolderPickerAdapter.Fol
         this.folderClickListener = folderClickListener;
     }
 
+    @NonNull
     @Override
-    public FolderViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public FolderViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         return new FolderViewHolder(
                 getInflater().inflate(R.layout.ef_imagepicker_item_folder, parent, false));
     }
 
     @Override
-    public void onBindViewHolder(final FolderViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull final FolderViewHolder holder, int position) {
         final Folder folder = folders.get(position);
 
         getImageLoader().loadImage(
@@ -74,9 +76,9 @@ public class FolderPickerAdapter extends BaseListAdapter<FolderPickerAdapter.Fol
         FolderViewHolder(View itemView) {
             super(itemView);
 
-            image = (ImageView) itemView.findViewById(R.id.image);
-            name = (TextView) itemView.findViewById(R.id.tv_name);
-            number = (TextView) itemView.findViewById(R.id.tv_number);
+            image = itemView.findViewById(R.id.image);
+            name = itemView.findViewById(R.id.tv_name);
+            number = itemView.findViewById(R.id.tv_number);
         }
     }
 }
