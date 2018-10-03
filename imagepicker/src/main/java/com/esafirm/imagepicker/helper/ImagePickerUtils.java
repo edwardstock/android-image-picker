@@ -6,7 +6,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Environment;
-import android.support.annotation.Nullable;
 
 import com.esafirm.imagepicker.features.ImagePickerSavePath;
 import com.esafirm.imagepicker.model.Image;
@@ -19,11 +18,43 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import androidx.annotation.Nullable;
+import timber.log.Timber;
+
 public class ImagePickerUtils {
 
     public static boolean isStringEmpty(@Nullable String str) {
         return str == null || str.length() == 0;
     }
+
+    public static File createVideoFile(ImagePickerSavePath savePath) {
+        // External sdcard location
+        final String path = savePath.getPath();
+        File mediaStorageDir = savePath.isFullPath()
+                ? new File(path)
+                : new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), path);
+
+        // Create the storage directory if it does not exist
+        if (!mediaStorageDir.exists()) {
+            if (!mediaStorageDir.mkdirs()) {
+                Timber.d("Oops! Failed create " + path);
+                return null;
+            }
+        }
+
+        // Create a media file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
+        String imageFileName = "VID_" + timeStamp;
+
+        File imageFile = null;
+        try {
+            imageFile = File.createTempFile(imageFileName, ".mp4", mediaStorageDir);
+        } catch (IOException e) {
+            Timber.d("Oops! Failed create " + imageFileName + " file");
+        }
+        return imageFile;
+    }
+
 
     public static File createImageFile(ImagePickerSavePath savePath) {
         // External sdcard location
@@ -35,7 +66,7 @@ public class ImagePickerUtils {
         // Create the storage directory if it does not exist
         if (!mediaStorageDir.exists()) {
             if (!mediaStorageDir.mkdirs()) {
-                IpLogger.getInstance().d("Oops! Failed create " + path);
+                Timber.d("Oops! Failed create " + path);
                 return null;
             }
         }
@@ -48,7 +79,7 @@ public class ImagePickerUtils {
         try {
             imageFile = File.createTempFile(imageFileName, ".jpg", mediaStorageDir);
         } catch (IOException e) {
-            IpLogger.getInstance().d("Oops! Failed create " + imageFileName + " file");
+            Timber.d("Oops! Failed create " + imageFileName + " file");
         }
         return imageFile;
     }

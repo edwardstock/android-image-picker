@@ -5,10 +5,9 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
 import android.widget.Switch;
 import android.widget.TextView;
+
 import com.esafirm.imagepicker.features.ImagePicker;
 import com.esafirm.imagepicker.features.IpCons;
 import com.esafirm.imagepicker.features.ReturnMode;
@@ -16,6 +15,10 @@ import com.esafirm.imagepicker.model.Image;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -82,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
         final boolean isExclude = ((Switch) findViewById(R.id.ef_switch_include_exclude)).isChecked();
 
         ImagePicker imagePicker = ImagePicker.create(this)
-                .language("in") // Set image picker language
+                .language(Locale.getDefault().getLanguage()) // Set image picker language
                 .theme(R.style.ImagePickerTheme)
                 .returnMode(returnAfterCapture
                         ? ReturnMode.ALL

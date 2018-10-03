@@ -21,4 +21,13 @@
         </shape>
     </item>
 
+    <item
+        android:bottom="2dp"
+        android:left="2dp"
+        android:right="2dp"
+        android:top="2dp"
+        >
+        <bitmap android:src="@drawable/ef_ic_done_white"/>
+    </item>
+
 </layer-list>

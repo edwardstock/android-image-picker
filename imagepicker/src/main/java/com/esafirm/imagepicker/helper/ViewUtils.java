@@ -3,11 +3,12 @@ package com.esafirm.imagepicker.helper;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
-import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.view.ViewTreeObserver;
 
 import com.esafirm.imagepicker.R;
+
+import androidx.core.content.ContextCompat;
 
 public class ViewUtils {
 

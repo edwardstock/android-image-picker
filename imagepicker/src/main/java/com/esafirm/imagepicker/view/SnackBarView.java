@@ -1,9 +1,6 @@
 package com.esafirm.imagepicker.view;
 
 import android.content.Context;
-import android.support.annotation.StringRes;
-import android.support.v4.view.ViewCompat;
-import android.support.v4.view.animation.FastOutLinearInInterpolator;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.animation.Interpolator;
@@ -12,6 +9,10 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.esafirm.imagepicker.R;
+
+import androidx.annotation.StringRes;
+import androidx.core.view.ViewCompat;
+import androidx.interpolator.view.animation.FastOutLinearInInterpolator;
 
 public class SnackBarView extends RelativeLayout {
 
@@ -47,8 +48,8 @@ public class SnackBarView extends RelativeLayout {
         int padding = getContext().getResources().getDimensionPixelSize(R.dimen.ef_spacing_double);
         setPadding(padding, 0, padding, 0);
 
-        txtCaption = (TextView) findViewById(R.id.ef_snackbar_txt_bottom_caption);
-        btnAction = (Button) findViewById(R.id.ef_snackbar_btn_action);
+        txtCaption = findViewById(R.id.ef_snackbar_txt_bottom_caption);
+        btnAction = findViewById(R.id.ef_snackbar_btn_action);
     }
 
     public void setText(@StringRes int textResId) {

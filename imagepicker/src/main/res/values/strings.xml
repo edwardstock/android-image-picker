@@ -14,6 +14,7 @@
     <string name="ef_selected_with_limit">%1$d/%2$d selected</string>
 
     <string name="ef_error_create_image_file">Failed to create image file</string>
+    <string name="ef_error_create_video_file">Failed to create video file</string>
     <string name="ef_error_no_camera">No camera found</string>
     <string name="ef_error_null_cursor">Oops, something went wrong!</string>
 
@@ -24,8 +25,16 @@
 
     <!--Don't Translate-->
     <string name="ef_gif" translatable="false">GIF</string>
-    <string name="ef_video" translatable="false">Video</string>
-    <string name="ef_content_desc_folder" translatable="false">Folder</string>
-    <string name="ef_content_desc_image" translatable="false">Image</string>
+    <string name="ef_video">Video</string>
+    <string name="ef_content_desc_folder">Folder</string>
+    <string name="ef_content_desc_image">Image</string>
+    <string name="transition_image">image_item</string>
+    <string name="ef_permission_request_title">Permission required</string>
+    <string name="ef_permission_request_grant">Grant</string>
+    <string name="ef_permission_request_deny">Deny</string>
+    <string name="ef_capture_photo">Capture photo</string>
+    <string name="ef_capture_video">Record video</string>
+    <string name="ef_cancel">Cancel</string>
+    <string name="ef_camera_only_message">What to do?</string>
 
 </resources>

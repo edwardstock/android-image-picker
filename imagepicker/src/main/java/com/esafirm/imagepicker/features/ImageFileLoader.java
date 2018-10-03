@@ -3,7 +3,6 @@ package com.esafirm.imagepicker.features;
 import android.content.Context;
 import android.database.Cursor;
 import android.provider.MediaStore;
-import android.support.annotation.Nullable;
 
 import com.esafirm.imagepicker.features.common.ImageLoaderListener;
 import com.esafirm.imagepicker.model.Folder;
@@ -17,13 +16,15 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import androidx.annotation.Nullable;
+
 public class ImageFileLoader {
 
-    private Context context;
-    private ExecutorService executorService;
+    private Context mContext;
+    private ExecutorService mExecutorService;
 
     public ImageFileLoader(Context context) {
-        this.context = context;
+        this.mContext = context;
     }
 
     private final String[] projection = new String[]{
@@ -38,62 +39,61 @@ public class ImageFileLoader {
     }
 
     public void abortLoadImages() {
-        if (executorService != null) {
-            executorService.shutdown();
-            executorService = null;
+        if (mExecutorService != null) {
+            mExecutorService.shutdown();
+            mExecutorService = null;
         }
     }
 
     private ExecutorService getExecutorService() {
-        if (executorService == null) {
-            executorService = Executors.newSingleThreadExecutor();
+        if (mExecutorService == null) {
+            mExecutorService = Executors.newSingleThreadExecutor();
         }
-        return executorService;
+        return mExecutorService;
     }
 
     private class ImageLoadRunnable implements Runnable {
+        private boolean mIncludePhotos;
+        private boolean mIsFolderMode;
+        private boolean mIncludeVideo;
+        private ArrayList<File> mExcludedImages;
+        private ImageLoaderListener mImageLoadListener;
 
-        private boolean includePhotos;
-        private boolean isFolderMode;
-        private boolean includeVideo;
-        private ArrayList<File> excludedImages;
-        private ImageLoaderListener listener;
-
-        public ImageLoadRunnable(boolean isFolderMode, boolean includeVideo, boolean includePhotos, ArrayList<File> excludedImages, ImageLoaderListener listener) {
-            this.isFolderMode = isFolderMode;
-            this.includeVideo = includeVideo;
-            this.includePhotos = includePhotos;
-            this.excludedImages = excludedImages;
-            this.listener = listener;
+        public ImageLoadRunnable(boolean isFolderMode, boolean includeVideo, boolean includePhotos, ArrayList<File> excludedImages, ImageLoaderListener imageLoadListener) {
+            mIsFolderMode = isFolderMode;
+            mIncludeVideo = includeVideo;
+            mIncludePhotos = includePhotos;
+            mExcludedImages = excludedImages;
+            mImageLoadListener = imageLoadListener;
         }
 
         @Override
         public void run() {
             Cursor cursor;
-            if (includeVideo && includePhotos) {
+            if (mIncludeVideo && mIncludePhotos) {
                 String selection = MediaStore.Files.FileColumns.MEDIA_TYPE + "="
                         + MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE + " OR "
                         + MediaStore.Files.FileColumns.MEDIA_TYPE + "="
                         + MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO;
 
-                cursor = context.getContentResolver().query(MediaStore.Files.getContentUri("external"), projection,
+                cursor = mContext.getContentResolver().query(MediaStore.Files.getContentUri("external"), projection,
                         selection, null, MediaStore.Images.Media.DATE_ADDED);
-            } else if(!includePhotos && includeVideo) {
-                cursor = context.getContentResolver().query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, projection,
+            } else if (!mIncludePhotos && mIncludeVideo) {
+                cursor = mContext.getContentResolver().query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, projection,
                         null, null, MediaStore.Video.Media.DATE_ADDED);
             } else {
-                cursor = context.getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection,
+                cursor = mContext.getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection,
                         null, null, MediaStore.Images.Media.DATE_ADDED);
             }
 
             if (cursor == null) {
-                listener.onFailed(new NullPointerException());
+                mImageLoadListener.onImageFailed(new NullPointerException());
                 return;
             }
 
             List<Image> temp = new ArrayList<>();
             Map<String, Folder> folderMap = null;
-            if (isFolderMode) {
+            if (mIsFolderMode) {
                 folderMap = new HashMap<>();
             }
 
@@ -106,7 +106,7 @@ public class ImageFileLoader {
 
                     File file = makeSafeFile(path);
                     if (file != null) {
-                        if (excludedImages != null && excludedImages.contains(file))
+                        if (mExcludedImages != null && mExcludedImages.contains(file))
                             continue;
 
                         Image image = new Image(id, name, path);
@@ -132,7 +132,7 @@ public class ImageFileLoader {
                 folders = new ArrayList<>(folderMap.values());
             }
 
-            listener.onImageLoaded(temp, folders);
+            mImageLoadListener.onImageLoaded(temp, folders);
         }
     }
 

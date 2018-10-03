@@ -2,7 +2,6 @@ package com.esafirm.imagepicker.features;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.annotation.StyleRes;
 
 import com.esafirm.imagepicker.features.common.BaseConfig;
 import com.esafirm.imagepicker.features.imageloader.ImageLoader;
@@ -10,6 +9,8 @@ import com.esafirm.imagepicker.model.Image;
 
 import java.io.File;
 import java.util.ArrayList;
+
+import androidx.annotation.StyleRes;
 
 public class ImagePickerConfig extends BaseConfig implements Parcelable {
 

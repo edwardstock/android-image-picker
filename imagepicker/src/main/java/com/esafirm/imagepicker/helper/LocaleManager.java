@@ -11,7 +11,7 @@ public class LocaleManager {
 
     private static String language;
 
-    public static void setLanguange(String newLanguage) {
+    public static void setLanguage(String newLanguage) {
         language = newLanguage;
     }
 

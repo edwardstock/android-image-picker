@@ -3,15 +3,11 @@ package com.esafirm.imagepicker.features;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.support.annotation.ColorInt;
-import android.support.annotation.NonNull;
-import android.support.annotation.StyleRes;
-import android.support.v4.app.Fragment;
 
+import com.esafirm.imagepicker.BuildConfig;
 import com.esafirm.imagepicker.features.cameraonly.ImagePickerCameraOnly;
 import com.esafirm.imagepicker.features.imageloader.ImageLoader;
 import com.esafirm.imagepicker.helper.ConfigUtils;
-import com.esafirm.imagepicker.helper.IpLogger;
 import com.esafirm.imagepicker.helper.LocaleManager;
 import com.esafirm.imagepicker.model.Image;
 
@@ -19,59 +15,20 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import androidx.annotation.ColorInt;
+import androidx.annotation.NonNull;
+import androidx.annotation.StyleRes;
+import androidx.fragment.app.Fragment;
+import timber.log.Timber;
+
 public abstract class ImagePicker {
 
     private ImagePickerConfig config;
 
-    public abstract void start();
-
-    public abstract void start(int requestCode);
-
-    public static class ImagePickerWithActivity extends ImagePicker {
-
-        private Activity activity;
-
-        public ImagePickerWithActivity(Activity activity) {
-            this.activity = activity;
-            init();
-        }
-
-        @Override
-        public void start(int requestCode) {
-            activity.startActivityForResult(getIntent(activity), requestCode);
-        }
-
-        @Override
-        public void start() {
-            activity.startActivityForResult(getIntent(activity), IpCons.RC_IMAGE_PICKER);
-        }
-    }
-
-    public static class ImagePickerWithFragment extends ImagePicker {
-
-        private Fragment fragment;
-
-        public ImagePickerWithFragment(Fragment fragment) {
-            this.fragment = fragment;
-            init();
-        }
-
-        @Override
-        public void start(int requestCode) {
-            fragment.startActivityForResult(getIntent(fragment.getActivity()), requestCode);
-        }
-
-        @Override
-        public void start() {
-            fragment.startActivityForResult(getIntent(fragment.getActivity()), IpCons.RC_IMAGE_PICKER);
-        }
-    }
-
-    /* --------------------------------------------------- */
-    /* > Stater */
-    /* --------------------------------------------------- */
-
     public void init() {
+        if (BuildConfig.DEBUG) {
+            Timber.plant(new Timber.DebugTree());
+        }
         config = ImagePickerConfigFactory.createDefault();
     }
 
@@ -88,8 +45,37 @@ public abstract class ImagePicker {
     }
 
     /* --------------------------------------------------- */
+    /* > Stater */
+    /* --------------------------------------------------- */
+
+    public static boolean shouldHandle(int requestCode, int resultCode, Intent data) {
+        return resultCode == Activity.RESULT_OK
+                && requestCode == IpCons.RC_IMAGE_PICKER
+                && data != null;
+    }
+
+    public static List<Image> getImages(Intent intent) {
+        if (intent == null) {
+            return null;
+        }
+        return intent.getParcelableArrayListExtra(IpCons.EXTRA_SELECTED_IMAGES);
+    }
+
+    public static Image getFirstImageOrNull(Intent intent) {
+        List<Image> images = getImages(intent);
+        if (images == null || images.isEmpty()) {
+            return null;
+        }
+        return images.get(0);
+    }
+
+    public abstract void start();
+
+    /* --------------------------------------------------- */
     /* > Builder */
     /* --------------------------------------------------- */
+
+    public abstract void start(int requestCode);
 
     public ImagePicker single() {
         config.setMode(IpCons.MODE_SINGLE);
@@ -187,18 +173,15 @@ public abstract class ImagePicker {
     }
 
     public ImagePicker enableLog(boolean isEnable) {
-        IpLogger.getInstance().setEnable(isEnable);
+        if (isEnable) {
+            Timber.plant(new Timber.DebugTree());
+        }
         return this;
     }
 
     public ImagePicker language(String language) {
         config.setLanguage(language);
         return this;
-    }
-
-    protected ImagePickerConfig getConfig() {
-        LocaleManager.setLanguange(config.getLanguage());
-        return config;
     }
 
     public Intent getIntent(Context context) {
@@ -212,24 +195,48 @@ public abstract class ImagePicker {
     /* > Helper */
     /* --------------------------------------------------- */
 
-    public static boolean shouldHandle(int requestCode, int resultCode, Intent data) {
-        return resultCode == Activity.RESULT_OK
-                && requestCode == IpCons.RC_IMAGE_PICKER
-                && data != null;
+    protected ImagePickerConfig getConfig() {
+        LocaleManager.setLanguage(config.getLanguage());
+        return config;
     }
 
-    public static List<Image> getImages(Intent intent) {
-        if (intent == null) {
-            return null;
+    public static class ImagePickerWithActivity extends ImagePicker {
+
+        private Activity activity;
+
+        public ImagePickerWithActivity(Activity activity) {
+            this.activity = activity;
+            init();
         }
-        return intent.getParcelableArrayListExtra(IpCons.EXTRA_SELECTED_IMAGES);
+
+        @Override
+        public void start(int requestCode) {
+            activity.startActivityForResult(getIntent(activity), requestCode);
+        }
+
+        @Override
+        public void start() {
+            activity.startActivityForResult(getIntent(activity), IpCons.RC_IMAGE_PICKER);
+        }
     }
 
-    public static Image getFirstImageOrNull(Intent intent) {
-        List<Image> images = getImages(intent);
-        if (images == null || images.isEmpty()) {
-            return null;
+    public static class ImagePickerWithFragment extends ImagePicker {
+
+        private Fragment fragment;
+
+        public ImagePickerWithFragment(Fragment fragment) {
+            this.fragment = fragment;
+            init();
         }
-        return images.get(0);
+
+        @Override
+        public void start(int requestCode) {
+            fragment.startActivityForResult(getIntent(fragment.getActivity()), requestCode);
+        }
+
+        @Override
+        public void start() {
+            fragment.startActivityForResult(getIntent(fragment.getActivity()), IpCons.RC_IMAGE_PICKER);
+        }
     }
 }

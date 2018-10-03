@@ -18,7 +18,10 @@ import com.esafirm.imagepicker.model.Image;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+
+import androidx.recyclerview.selection.SelectionTracker;
 
 class ImagePickerPresenter extends BasePresenter<ImagePickerView> {
 
@@ -76,36 +79,58 @@ class ImagePickerPresenter extends BasePresenter<ImagePickerView> {
             }
 
             @Override
-            public void onFailed(final Throwable throwable) {
+            public void onImageFailed(final Throwable throwable) {
                 runOnUiIfAvailable(() -> getView().showError(throwable));
             }
         });
     }
 
-    void onDoneSelectImages(List<Image> selectedImages) {
-        if (selectedImages != null && selectedImages.size() > 0) {
+    void onDoneSelectImages(SelectionTracker<Image> selectionTracker) {
+        if (selectionTracker != null && selectionTracker.getSelection().size() > 0) {
+            final Iterator<Image> iter = selectionTracker.getSelection().iterator();
 
             /* Scan selected images which not existed */
-            for (int i = 0; i < selectedImages.size(); i++) {
-                Image image = selectedImages.get(i);
-                File file = new File(image.getPath());
+            List<Image> output = new ArrayList<>(selectionTracker.getSelection().size());
+            while (iter.hasNext()) {
+                Image img = iter.next();
+                File file = new File(img.getPath());
                 if (!file.exists()) {
-                    selectedImages.remove(i);
-                    i--;
+                    selectionTracker.deselect(img);
+                } else {
+                    output.add(img);
                 }
             }
-            getView().finishPickImages(selectedImages);
+            getView().finishPickImages(output);
+        }
+    }
+
+    void captureVideo(Activity activity, BaseConfig config, int requestCode) {
+        Context context = activity.getApplicationContext();
+        Intent intent = getCameraModule().getCameraVideoIntent(activity, config);
+        if (intent == null) {
+            Toast.makeText(context, context.getString(R.string.ef_error_create_video_file), Toast.LENGTH_LONG).show();
+            return;
+        }
+        if (intent.resolveActivity(activity.getPackageManager()) != null) {
+            activity.startActivityForResult(intent, requestCode);
+        } else {
+            Toast.makeText(context, context.getString(R.string.ef_error_create_video_file), Toast.LENGTH_LONG).show();
         }
     }
 
     void captureImage(Activity activity, BaseConfig config, int requestCode) {
         Context context = activity.getApplicationContext();
-        Intent intent = getCameraModule().getCameraIntent(activity, config);
+        Intent intent = getCameraModule().getCameraPhotoIntent(activity, config);
         if (intent == null) {
             Toast.makeText(context, context.getString(R.string.ef_error_create_image_file), Toast.LENGTH_LONG).show();
             return;
         }
-        activity.startActivityForResult(intent, requestCode);
+        if (intent.resolveActivity(activity.getPackageManager()) != null) {
+            activity.startActivityForResult(intent, requestCode);
+        } else {
+            Toast.makeText(context, context.getString(R.string.ef_error_create_image_file), Toast.LENGTH_LONG).show();
+        }
+
     }
 
     void finishCaptureImage(Context context, Intent data, final BaseConfig config) {
@@ -118,8 +143,22 @@ class ImagePickerPresenter extends BasePresenter<ImagePickerView> {
         });
     }
 
+    void finishCaptureVideo(Context context, Intent data, final BaseConfig config) {
+        getCameraModule().getVideo(context, data, videos -> {
+            if (ConfigUtils.shouldReturn(config, true)) {
+                getView().finishPickImages(videos);
+            } else {
+                getView().showCapturedImage();
+            }
+        });
+    }
+
+    void abortCaptureVideo() {
+        getCameraModule().removeCaptured();
+    }
+
     void abortCaptureImage() {
-        getCameraModule().removeImage();
+        getCameraModule().removeCaptured();
     }
 
     private void runOnUiIfAvailable(Runnable runnable) {

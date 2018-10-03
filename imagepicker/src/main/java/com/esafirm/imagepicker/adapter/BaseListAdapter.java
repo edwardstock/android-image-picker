@@ -1,32 +1,33 @@
 package com.esafirm.imagepicker.adapter;
 
 import android.content.Context;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 
 import com.esafirm.imagepicker.features.imageloader.ImageLoader;
 
+import androidx.recyclerview.widget.RecyclerView;
+
 public abstract class BaseListAdapter<T extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<T> {
 
-    private final Context context;
-    private final LayoutInflater inflater;
-    private final ImageLoader imageLoader;
+    private final Context mContext;
+    private final LayoutInflater mInflater;
+    private final ImageLoader mImageLoader;
 
     public BaseListAdapter(Context context, ImageLoader imageLoader) {
-        this.context = context;
-        this.inflater = LayoutInflater.from(context);
-        this.imageLoader = imageLoader;
+        mContext = context;
+        mInflater = LayoutInflater.from(context);
+        mImageLoader = imageLoader;
     }
 
     public ImageLoader getImageLoader() {
-        return imageLoader;
+        return mImageLoader;
     }
 
     public Context getContext() {
-        return context;
+        return mContext;
     }
 
     public LayoutInflater getInflater() {
-        return inflater;
+        return mInflater;
     }
 }

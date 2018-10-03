@@ -16,4 +16,15 @@
     <string name="ef_msg_no_write_external_permission">Пожалуйста, разрешите доступ к хранилищу, чтобы выбрать изображения</string>
     <string name="ef_msg_no_camera_permission">Пожалуйста, разрешите доступ к камере, чтобы сделать снимок</string>
     <string name="ef_msg_limit_images">Лимит выбора изображений</string>
+    <string name="ef_error_create_video_file">Не удалось создать видео файл</string>
+    <string name="ef_video">Видео</string>
+    <string name="ef_content_desc_folder">Папка</string>
+    <string name="ef_content_desc_image">Фото</string>
+    <string name="ef_permission_request_title">Требуется разрешение</string>
+    <string name="ef_permission_request_grant">Разрешить</string>
+    <string name="ef_permission_request_deny">Запретить</string>
+    <string name="ef_capture_photo">Сделать фото</string>
+    <string name="ef_capture_video">Снять видео</string>
+    <string name="ef_cancel">Cancel</string>
+    <string name="ef_camera_only_message">Что сделать?</string>
 </resources>

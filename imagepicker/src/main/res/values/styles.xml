@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
     <style name="ef_BaseTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="windowActionModeOverlay">true</item>
@@ -15,6 +15,22 @@
     <style name="ef_CustomToolbarTheme" parent="Base.ThemeOverlay.AppCompat.ActionBar">
         <item name="android:textColorPrimary">@color/ef_colorTextPrimary</item>
         <item name="actionMenuTextColor">@color/ef_colorTextPrimary</item>
+    </style>
+
+    <style name="ef_Dark" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="colorPrimary">@android:color/white</item>
+        <item name="colorPrimaryDark">@android:color/black</item>
+        <item name="android:textColorPrimary">@android:color/black</item>
+        <item name="android:subtitleTextColor" tools:targetApi="m">@android:color/black</item>
+        <item name="subtitleTextColor">@android:color/black</item>
+        <item name="colorAccent">@android:color/black</item>
+        <item name="actionOverflowButtonStyle">@style/ef_Dark.Menu</item>
+    </style>
+
+    <style name="ef_Dark.Menu" parent="Widget.AppCompat.ActionButton.Overflow">
+        <item name="android:tint">@color/ef_white</item>
     </style>
 
 </resources>
